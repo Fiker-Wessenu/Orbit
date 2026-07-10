@@ -1,4 +1,4 @@
-package com.android_project
+package com.chat
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
