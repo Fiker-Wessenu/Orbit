@@ -1,41 +1,21 @@
 {
   "project_info": {
-    "project_number": "395322637585",
-    "firebase_url": "https://orbitchat-3ff69-default-rtdb.europe-west1.firebasedatabase.app",
-    "project_id": "orbitchat-3ff69",
-    "storage_bucket": "orbitchat-3ff69.firebasestorage.app"
+    "project_number": "901982597632",
+    "project_id": "orbit2-e551b",
+    "storage_bucket": "orbit2-e551b.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:395322637585:android:e17133d4ec7dd169d960b0",
+        "mobilesdk_app_id": "1:901982597632:android:69ea91f9cf21b0c5c49ee5",
         "android_client_info": {
-          "package_name": "SSGI.ORBIT.CHAT"
+          "package_name": "com.android_project"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyC7LoXLHGpKL5DDSoukElGaoXQZ3aBuAEk"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:395322637585:android:269f05586aa72787d960b0",
-        "android_client_info": {
-          "package_name": "com.chat"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyC7LoXLHGpKL5DDSoukElGaoXQZ3aBuAEk"
+          "current_key": "AIzaSyBlLIMnkoyUw3yEOcjTgkqgWPuRcz2RBKM"
         }
       ],
       "services": {

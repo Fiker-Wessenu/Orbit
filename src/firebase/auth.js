@@ -1,35 +1,20 @@
-import {
- getAuth,
- createUserWithEmailAndPassword,
- signInWithEmailAndPassword
-}
-from "firebase/auth";
+import auth from '@react-native-firebase/auth';
 
-import {app} from "./config";
+export const registerUser = async (email, password) => {
+  const userCredential =
+    await auth().createUserWithEmailAndPassword(
+      email,
+      password,
+    );
 
+  await userCredential.user.sendEmailVerification();
 
-export const auth = getAuth(app);
-
-
-export const registerUser =
-(email,password)=>{
-
-return createUserWithEmailAndPassword(
-auth,
-email,
-password
-);
-
+  return userCredential;
 };
 
-
-export const loginUser =
-(email,password)=>{
-
-return signInWithEmailAndPassword(
-auth,
-email,
-password
-);
-
+export const loginUser = async (email, password) => {
+  return await auth().signInWithEmailAndPassword(
+    email,
+    password,
+  );
 };

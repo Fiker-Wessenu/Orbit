@@ -1,59 +1,113 @@
 import React, {useState} from 'react';
+
 import {
   View,
   Text,
   TextInput,
   Button,
   Alert,
+  StyleSheet
 } from 'react-native';
 
-import {registerUser} from '../firebase/auth';
+import auth from '@react-native-firebase/auth';
+
 
 export default function RegisterScreen() {
+
   const [email, setEmail] = useState('');
-  const [password, setPassword] =
-    useState('');
+  const [password, setPassword] = useState('');
 
-  const handleRegister = async () => {
+
+  const createAccount = async () => {
+
     try {
-      await registerUser(
-        email,
-        password,
-      );
+
+      const userCredential =
+        await auth().createUserWithEmailAndPassword(
+          email,
+          password
+        );
+
+
+      await userCredential.user.sendEmailVerification();
+
 
       Alert.alert(
-        'Success',
-        'Check your email to verify your account',
+        "Success",
+        "Account created! Check your email for verification."
       );
+
+
     } catch (error) {
+
       Alert.alert(
-        'Error',
-        error.message,
+        "Firebase Error",
+        error.message
       );
+
     }
+
   };
 
+
   return (
-    <View>
-      <Text>Create Account</Text>
+
+    <View style={styles.container}>
+
+      <Text style={styles.title}>
+        OrbitChat Create Account
+      </Text>
+
 
       <TextInput
-        placeholder="Email"
+        style={styles.input}
+        placeholder="Enter Email"
         value={email}
         onChangeText={setEmail}
       />
 
+
       <TextInput
-        placeholder="Password"
+        style={styles.input}
+        placeholder="Enter Password"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
       />
 
+
       <Button
-        title="Register"
-        onPress={handleRegister}
+        title="Create Account"
+        onPress={createAccount}
       />
+
+
     </View>
+
   );
+
 }
+
+
+const styles = StyleSheet.create({
+
+  container:{
+    flex:1,
+    justifyContent:'center',
+    padding:20
+  },
+
+  title:{
+    fontSize:24,
+    textAlign:'center',
+    marginBottom:30
+  },
+
+  input:{
+    borderWidth:1,
+    padding:10,
+    marginBottom:15,
+    borderRadius:5
+  }
+
+});
