@@ -28,10 +28,8 @@ service cloud.firestore {
 
       allow read: if isSignedIn();
 
-      // Only the user themselves can create their own profile,
-      // and only if their auth email is on the required domain.
-      allow create: if isOwner(uid) &&
-        request.auth.token.email.matches('.*@ssgi[.]gov[.]et$');
+      // Only the user themselves can create their own profile.
+      allow create: if isOwner(uid);
 
       allow update: if isOwner(uid) &&
         !request.resource.data.diff(resource.data).affectedKeys()

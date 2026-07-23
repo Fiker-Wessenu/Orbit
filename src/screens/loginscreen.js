@@ -6,7 +6,9 @@ View,
 Text,
 TextInput,
 Button,
-Alert
+Alert,
+TouchableOpacity,
+StyleSheet
 } from 'react-native';
 
 
@@ -14,7 +16,7 @@ import auth from '@react-native-firebase/auth';
 
 
 
-export default function LoginScreen(){
+export default function LoginScreen({ navigation }){
 
 
 const [email,setEmail]=useState("");
@@ -75,10 +77,10 @@ error.message
 
 return(
 
-<View>
+<View style={styles.container}>
 
 
-<Text>
+<Text style={styles.title}>
 OrbitChat Login
 </Text>
 
@@ -86,15 +88,21 @@ OrbitChat Login
 
 <TextInput
 
+style={styles.input}
+
 placeholder="Email"
 
 onChangeText={setEmail}
+
+autoCapitalize="none"
 
 />
 
 
 
 <TextInput
+
+style={styles.input}
 
 placeholder="Password"
 
@@ -115,126 +123,13 @@ onPress={login}
 />
 
 
-</View>
+<TouchableOpacity onPress={() => navigation.navigate('Register')}>
 
-);
-
-
-}import React,{useState} from 'react';
-
-
-import {
-View,
-Text,
-TextInput,
-Button,
-Alert
-} from 'react-native';
-
-
-import auth from '@react-native-firebase/auth';
-
-
-
-export default function LoginScreen(){
-
-
-const [email,setEmail]=useState("");
-
-const [password,setPassword]=useState("");
-
-
-
-const login = async()=>{
-
-
-try{
-
-
-const result =
-await auth()
-.signInWithEmailAndPassword(
-email,
-password
-);
-
-
-
-if(!result.user.emailVerified){
-
-Alert.alert(
-"Verify Email",
-"Please verify your email first"
-);
-
-return;
-
-}
-
-
-Alert.alert(
-"Success",
-"Login successful"
-);
-
-
-
-}
-
-catch(error){
-
-Alert.alert(
-"Error",
-error.message
-);
-
-}
-
-
-};
-
-
-
-return(
-
-<View>
-
-
-<Text>
-OrbitChat Login
+<Text style={styles.link}>
+Don't have an account? Create one
 </Text>
 
-
-
-<TextInput
-
-placeholder="Email"
-
-onChangeText={setEmail}
-
-/>
-
-
-
-<TextInput
-
-placeholder="Password"
-
-secureTextEntry
-
-onChangeText={setPassword}
-
-/>
-
-
-
-<Button
-
-title="Login"
-
-onPress={login}
-
-/>
+</TouchableOpacity>
 
 
 </View>
@@ -243,3 +138,33 @@ onPress={login}
 
 
 }
+
+
+const styles = StyleSheet.create({
+
+container:{
+flex:1,
+justifyContent:'center',
+padding:20
+},
+
+title:{
+fontSize:24,
+textAlign:'center',
+marginBottom:30
+},
+
+input:{
+borderWidth:1,
+padding:10,
+marginBottom:15,
+borderRadius:5
+},
+
+link:{
+marginTop:20,
+textAlign:'center',
+color:'#2f81f7'
+}
+
+});
