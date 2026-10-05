@@ -1,0 +1,145 @@
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
+import { storage } from '../storage';
+import { initPresence } from '../../services/presenceService';
+
+const AuthContext = createContext();
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let unsubscribeProfile = null;
+    let cleanupPresence = null;
+
+    // Listens for sign-in/sign-out. AppNavigator has its own listener for
+    // routing; this one keeps `user` here in sync with the live Firestore profile.
+    const unsubscribeAuth = auth().onAuthStateChanged((firebaseUser) => {
+      // Tear down any previous profile listener before attaching a new one
+      // (or none, if the user just signed out).
+      if (unsubscribeProfile) {
+        unsubscribeProfile();
+        unsubscribeProfile = null;
+      }
+      if (cleanupPresence) {
+        cleanupPresence();
+        cleanupPresence = null;
+      }
+
+      if (!firebaseUser) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      cleanupPresence = initPresence(firebaseUser.uid);
+
+      unsubscribeProfile = firestore()
+        .collection('users')
+        .doc(firebaseUser.uid)
+        .onSnapshot(
+          (doc) => {
+            const docData = (doc && doc.exists) ? doc.data() : {};
+            setUser({
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              emailVerified: firebaseUser.emailVerified,
+              ...docData,
+              name: docData.fullName || null,
+              fullName: docData.fullName || null,
+              profilePicture: docData.photoURL || null,
+            });
+            setLoading(false);
+          },
+          (error) => {
+            console.error('Failed to load profile:', error);
+            setLoading(false);
+          }
+        );
+    });
+
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeProfile) unsubscribeProfile();
+      if (cleanupPresence) cleanupPresence();
+    };
+  }, []);
+
+  // Sign-in/sign-up themselves happen directly via auth() in LoginScreen/SignUpScreen —
+  // this context just reacts to the resulting auth state, so there's no login()
+  // to call here anymore.
+
+  const logout = async () => {
+    try {
+      await auth().signOut();
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
+  const signIn = async (email, password) => {
+    return await auth().signInWithEmailAndPassword(email, password);
+  };
+
+  const signUp = async (email, password, fullName, extraData = {}) => {
+    const userCredential = await auth().createUserWithEmailAndPassword(email, password);
+    const user = userCredential.user;
+
+    await user.updateProfile({
+      displayName: fullName.trim(),
+    });
+
+    await user.sendEmailVerification();
+
+    await firestore().collection('users').doc(user.uid).set({
+      uid: user.uid,
+      fullName: fullName.trim(),
+      email: user.email,
+      photoURL: null,
+      emailVerified: false,
+      createdAt: firestore.FieldValue.serverTimestamp(),
+      ...extraData,
+    });
+
+    return userCredential;
+  };
+
+  const updateProfilePicture = async (localUri) => {
+    const uid = auth().currentUser?.uid;
+    if (!uid) {
+      throw new Error('No signed-in user');
+    }
+
+    const reference = storage().ref(`profile_pictures/${uid}.jpg`);
+    await reference.putFile(localUri);
+    const downloadURL = await reference.getDownloadURL();
+
+    await firestore().collection('users').doc(uid).update({
+      photoURL: downloadURL,
+    });
+
+    // No need to manually setUser — the onSnapshot listener above
+    // picks up this Firestore change and updates `user` automatically.
+    return downloadURL;
+  };
+
+  const resetPassword = async (email) => {
+    return await auth().sendPasswordResetEmail(email);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, logout, updateProfilePicture, resetPassword }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
